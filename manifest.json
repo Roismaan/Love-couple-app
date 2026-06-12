@@ -1,0 +1,14 @@
+{
+  "name": "Наша История ❤️",
+  "short_name": "МыВместе",
+  "description": "Счётчик дней нашей любви",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d0d1a",
+  "theme_color": "#ff6b9d",
+  "orientation": "portrait",
+  "icons": [],
+
+  "categories": ["lifestyle", "social"],
+  "lang": "ru"
+}

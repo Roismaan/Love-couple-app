@@ -1,0 +1,15 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**",
+      "bot.py",
+      "upload_photos.py",
+      "requirements.txt",
+      "serviceAccountKey.json",
+      ".idea/**"
+    ]
+  }
+}

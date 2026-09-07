@@ -1,10 +1,14 @@
 // Service Worker для PWA - couple-app
-const CACHE_NAME = 'couple-app-v1';
+const CACHE_NAME = 'couple-app-v2';
+
+// Используем относительные пути для корректной работы на GitHub Pages
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/manifest.json',
-    '/firebase-config.js',
+    './',
+    './index.html',
+    './manifest.json',
+    './firebase-config.js',
+    './photo1.jpg',
+    './photo2.jpg',
     'https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Poppins:wght@300;400;500;600&display=swap',
     'https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js',
     'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
@@ -15,9 +19,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             console.log('[SW] Кэшируем статические ресурсы');
-            return cache.addAll(STATIC_ASSETS.map(url => {
-                return new Request(url, { mode: 'no-cors' });
-            })).catch(err => {
+            return cache.addAll(STATIC_ASSETS).catch(err => {
                 console.warn('[SW] Не удалось кэшировать некоторые ресурсы:', err);
             });
         })
@@ -42,15 +44,15 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Перехват запросов — Network First для Firebase, Cache First для статики
+// Перехват запросов
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // Firebase запросы — всегда сеть
+    // Firebase и внешние API — всегда сеть
     if (url.hostname.includes('firebase') ||
-        url.hostname.includes('googleapis') ||
         url.hostname.includes('gstatic') ||
-        url.hostname.includes('firebaseio')) {
+        url.hostname.includes('firebaseio') ||
+        url.hostname.includes('firestore.googleapis.com')) {
         event.respondWith(
             fetch(event.request).catch(() => {
                 return new Response(JSON.stringify({ error: 'Offline' }), {
@@ -61,14 +63,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Статические ресурсы — Cache First
+    // Статика — Cache First, затем Network
     event.respondWith(
         caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
                 return cachedResponse;
             }
             return fetch(event.request).then((response) => {
-                if (!response || response.status !== 200) {
+                if (!response || response.status !== 200 || response.type !== 'basic') {
                     return response;
                 }
                 const responseClone = response.clone();
@@ -88,10 +90,10 @@ self.addEventListener('push', (event) => {
     let notificationData = {
         title: '❤️ Наша история',
         body: 'Новое сообщение от любимого человека',
-        icon: '',
-        badge: '',
+        icon: './photo1.jpg',
+        badge: './icons/icon-192.png',
         vibrate: [200, 100, 200, 100, 200],
-        data: { url: '/' },
+        data: { url: './' },
         actions: [
             { action: 'open', title: 'Открыть ❤️' },
             { action: 'close', title: 'Закрыть' }
@@ -127,7 +129,7 @@ self.addEventListener('notificationclick', (event) => {
 
     if (event.action === 'close') return;
 
-    const urlToOpen = (event.notification.data && event.notification.data.url) || '/';
+    const urlToOpen = new URL((event.notification.data && event.notification.data.url) || './', self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {

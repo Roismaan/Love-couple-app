@@ -1755,9 +1755,8 @@
         img.src = 'bg.jpg';
     }
 
-    function updateUserBadge() {
-        const role = isAdmin ? 'admin' : 'user2';
-        document.getElementById('userBadgeName').textContent = ROLE_LABELS[role];
+    function updateUserBadge(role) {
+        document.getElementById('userBadge')?.textContent = role;
     }
 
     // ======================================================

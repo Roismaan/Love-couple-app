@@ -1756,7 +1756,10 @@
     }
 
     function updateUserBadge(role) {
-        document.getElementById('userBadge')?.textContent = role;
+        const badge = document.getElementById('userBadge');
+        if (badge) {
+            badge.textContent = role;
+        }
     }
 
     // ======================================================

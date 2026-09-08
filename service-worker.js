@@ -1,5 +1,5 @@
 // Service Worker для PWA - couple-app
-const CACHE_NAME = 'couple-app-v2';
+const CACHE_NAME = 'couple-app-v3';
 
 // Используем относительные пути для корректной работы на GitHub Pages
 const STATIC_ASSETS = [

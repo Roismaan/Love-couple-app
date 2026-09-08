@@ -2525,7 +2525,7 @@
         // ======================================================
         function registerSW() {
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./service-worker.js')
+                navigator.serviceWorker.register(new URL('service-worker.js', document.baseURI).href)
                     .then((reg) => console.log('[SW] Успешно зарегистрирован:', reg.scope))
                     .catch((err) => console.error('SW ошибка:', err));
             }

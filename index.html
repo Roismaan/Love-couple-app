@@ -1650,12 +1650,12 @@
     }
 
     async function trySignIn() {
-        // Пробуем сначала admin, потом user2
-        const creds = window.CREDENTIALS;
-        if (!creds) {
-            showError('Не нашли данные для входа. Проверь firebase-config.js');
-            return;
-        }
+    try {
+        await auth.signInAnonymously();
+    } catch (e) {
+        showError('Не получилось войти. Попробуй обновить страницу.');
+    }
+}
 
         // Если нет сохранённой роли — пробуем оба
         const savedRole = localStorage.getItem('_couple_role');
@@ -1675,25 +1675,34 @@
         showError('Не получилось войти. Проверь почту и пароль в firebase-config.js');
     }
 
-    function onUserReady() {
-        isAdmin = currentUser.uid === window.ADMIN_UID;
-        localStorage.setItem('_couple_role', isAdmin ? 'admin' : 'user2');
-        updateUserBadge();
+ function onUserReady() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const roleParam = urlParams.get('role');
 
-        if (isAdmin) {
-            document.getElementById('startDateSection').style.display = 'block';
-            document.getElementById('resetSection').style.display = 'block';
-        }
-
-        document.getElementById('resetDefaultDate').textContent = window.DEFAULT_START_DATE;
-
-        subscribeToData();
-        subscribeToMessages();
-        initFCM();
-        createParticles();
-        setupAudioUnlock();
+    if (roleParam === 'admin' || roleParam === 'user2') {
+        isAdmin = roleParam === 'admin';
+        localStorage.setItem('_couple_role', roleParam);
+    } else {
+        // ссылки без ?role= — берём то, что запомнили раньше, иначе по умолчанию "не админ"
+        const saved = localStorage.getItem('_couple_role');
+        isAdmin = saved === 'admin';
     }
 
+    updateUserBadge(isAdmin ? 'admin' : 'user2');
+
+    if (isAdmin) {
+        document.getElementById('startDateSection').style.display = 'block';
+        document.getElementById('resetSection').style.display = 'block';
+    }
+
+    document.getElementById('resetDefaultDate').textContent = window.DEFAULT_START_DATE;
+
+    subscribeToData();
+    subscribeToMessages();
+    initFCM();
+    createParticles();
+    setupAudioUnlock();
+}
     const LOCAL_PHOTOS = { staryk: 'photo1.jpg', malysh: 'photo2.jpg' };
 
     function pickAvatarFile(stored, localFile) {
